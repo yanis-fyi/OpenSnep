@@ -14,7 +14,7 @@ def get_artist(name: str) -> list[Single]:
     with Session(engine) as session:
         return (
             session.query(Single)
-            .filter(Single.interprete.ilike(name))
+            .filter(Single.interprete.ilike(f"{name}%"))
             .all()
         )
 

@@ -27,4 +27,12 @@ class Single(Base):
         DateTime,
         default=lambda: datetime.now(timezone.utc)
     )
-
+    #representation of an object    
+    def __repr__(self) -> str:
+        return (
+            f"<Single("
+            f"interprete='{self.interprete}', "
+            f"titre='{self.titre}', "
+            f"certification='{self.certification}'"
+            f")>"
+        )

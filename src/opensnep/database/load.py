@@ -6,7 +6,7 @@ from opensnep.database.models import Base, Single
 def create_tables() -> None:
     Base.metadata.create_all(engine)
 
-#load data into SQLite
+#load data into
 def load_singles(df) -> None:
     create_tables()
 
