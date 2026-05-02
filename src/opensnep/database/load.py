@@ -41,5 +41,5 @@ def load_singles(df) -> None:
         session.add_all(records)
         session.commit()
 
-    print(f"Replaced{deleted} existing rows for {source_year}")
+    print(f"Replaced {deleted} existing rows for {source_year}")
     print(f"{len(records)} rows inserted into singles table")

@@ -15,7 +15,7 @@ class Single(Base):
     interprete: Mapped[str] = mapped_column(String)
     interprete_principal: Mapped[str] = mapped_column(String)
     titre: Mapped[str] = mapped_column(String)
-    editeur_distributeur: Mapped[str] = mapped_column(String)
+    editeur_distributeur: Mapped[str | None] = mapped_column(String, nullable=True)
     certification: Mapped[str] = mapped_column(String)
 
     date_sortie: Mapped[datetime] = mapped_column(DateTime)

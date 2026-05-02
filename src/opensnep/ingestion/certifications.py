@@ -1,6 +1,5 @@
 import re
 import time
-from io import StringIO
 from pathlib import Path
 
 import pandas as pd
@@ -46,32 +45,42 @@ def get_total_pages(session: requests.Session, year: int, category: str) -> int:
 
     return 1
 
-#download csv file
-def extract_csv_url(html: str) -> str:
+
+#parse html code
+def parse_certifications_from_html(html: str) -> pd.DataFrame:
     soup = BeautifulSoup(html, "html.parser")
-    for link in soup.find_all("a", href=True):
-        label = link.get_text(" ", strip=True)
-        if "CSV" in label.upper():
-            return link["href"]
-    raise ValueError("CSV link not found on page")
+    records = []
 
-#read csv file
-def read_csv_from_url(
-    session: requests.Session,
-    csv_url: str,
-    referer: str,
-) -> pd.DataFrame:
-    response = session.get(
-        csv_url,
-        headers={"Referer": referer},
-        timeout=30,
-    )
-    response.raise_for_status()
-    decoded_text = response.content.decode("utf-8-sig")
+    for block in soup.select("div.certification"):
+        def get_text(selector: str) -> str | None:
+            element = block.select_one(selector)
+            return element.get_text(" ", strip=True) if element else None
 
-    return pd.read_csv(StringIO(decoded_text), sep=";")
+        dates = {}
 
-#TODO make it possible to crawl other pages 
+        for date_block in block.select("div.block_dates div.date"):
+            label = date_block.select_one("span")
+
+            if label:
+                label_text = label.get_text(" ", strip=True)
+                label.extract()
+                dates[label_text] = date_block.get_text(" ", strip=True)
+
+        records.append(
+            {
+                "Interprete": get_text(".artiste"),
+                "Titre": get_text(".titre"),
+                "Éditeur / Distributeur": get_text(".editeur"),
+                "Catégorie": get_text(".categorie"),
+                "Certification": get_text(".certif"),
+                "Date de sortie": dates.get("Date de sortie"),
+                "Date de constat": dates.get("Date de constat"),
+            }
+        )
+
+    return pd.DataFrame(records)
+
+ 
 # crawl certifications page 
 def crawl_certifications(
     year: int,
@@ -102,15 +111,10 @@ def crawl_certifications(
         page_response = page_session.get(url, timeout=30)
         page_response.raise_for_status()
 
-        csv_url = extract_csv_url(page_response.text)
+        df_page = parse_certifications_from_html(page_response.text)
 
-        time.sleep(3) # wait for server-side export/cache
-
-        df_page = read_csv_from_url(
-            session=page_session,
-            csv_url=csv_url,
-            referer=page_response.url,
-        )
+        if df_page.empty:
+            raise ValueError(f"No certifications found on page {page}")
 
         print(page, df_page.shape)
 

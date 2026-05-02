@@ -41,4 +41,16 @@ def search_title(keyword: str) -> list[Single]:
             .all()
         )
         
-        
+#find nbr of certifications by type for artist
+def artist_certifications(name: str) -> list[tuple[str, int]]:
+    with Session(engine) as session:
+        return (
+            session.query(
+                Single.certification,
+                func.count(Single.id).label("count")
+        )
+        .filter(Single.interprete_principal.ilike(f"%{name}%"))
+        .group_by(Single.certification)
+        .order_by(func.count(Single.id).desc())
+        .all()
+        )

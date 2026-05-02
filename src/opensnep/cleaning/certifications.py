@@ -55,6 +55,7 @@ def clean_text_columns(df: pd.DataFrame) -> pd.DataFrame:
         if column in df.columns:
             df[column] = (
                 df[column]
+                .fillna("")
                 .astype(str)
                 .str.strip()
                 .str.replace(r"\s+", " ", regex=True)
@@ -88,6 +89,7 @@ def clean_certifications(df: pd.DataFrame) -> pd.DataFrame:
     df["interprete_principal"] = df["interprete"].apply(
         extract_interprete_principal
     )
+    
 
     ordered_columns = [
         "interprete",
