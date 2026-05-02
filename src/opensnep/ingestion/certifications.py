@@ -104,7 +104,7 @@ def crawl_certifications(
 
         csv_url = extract_csv_url(page_response.text)
 
-        time.sleep(2) # wait for server-side export/cache
+        time.sleep(3) # wait for server-side export/cache
 
         df_page = read_csv_from_url(
             session=page_session,
