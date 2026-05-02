@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 from opensnep.database.connection import engine
 from opensnep.database.models import Base, Single
 
+#creates table if missing
 def create_tables() -> None:
     Base.metadata.create_all(engine)
 
+#load data into SQLite
 def load_singles(df) -> None:
     create_tables()
 

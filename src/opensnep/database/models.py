@@ -3,9 +3,11 @@ from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 
+#create the parent class
 class Base(DeclarativeBase):
     pass
 
+#Define one table
 class Single(Base): 
     __tablename__ = "singles"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
