@@ -30,6 +30,22 @@ DATE_COLUMNS = [
     "date_constat",
 ]
 
+COLLAB_MARKERS = [
+    " FEAT. ",
+    " FEAT ",
+    " FT. ",
+    " FT ",
+    " FEATURING ",
+    " X ",
+]
+
+
+def extract_interprete_principal(interprete: str) -> str:
+    for marker in COLLAB_MARKERS:
+        if marker in interprete:
+            return interprete.split(marker)[0].strip()
+        
+    return interprete.strip()
 
 def clean_text_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -68,8 +84,13 @@ def clean_certifications(df: pd.DataFrame) -> pd.DataFrame:
     df = clean_text_columns(df)
     df = clean_date_columns(df)
 
+    df["interprete_principal"] = df["interprete"].apply(
+        extract_interprete_principal
+    )
+
     ordered_columns = [
         "interprete",
+        "interprete_principal",
         "titre",
         "editeur_distributeur",
         "categorie",

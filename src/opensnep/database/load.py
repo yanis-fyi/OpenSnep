@@ -15,6 +15,7 @@ def load_singles(df) -> None:
     for _, row in df.iterrows():
         record = Single( 
             interprete=row["interprete"],
+            interprete_principal=row["interprete_principal"],
             titre=row["titre"],
             editeur_distributeur=row["editeur_distributeur"],
             certification=row["certification"],

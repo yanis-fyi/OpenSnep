@@ -13,6 +13,7 @@ class Single(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     interprete: Mapped[str] = mapped_column(String)
+    interprete_principal: Mapped[str] = mapped_column(String)
     titre: Mapped[str] = mapped_column(String)
     editeur_distributeur: Mapped[str] = mapped_column(String)
     certification: Mapped[str] = mapped_column(String)
@@ -32,6 +33,7 @@ class Single(Base):
         return (
             f"<Single("
             f"interprete='{self.interprete}', "
+            f"interprete_principal='{self.interprete_principal}', "
             f"titre='{self.titre}', "
             f"certification='{self.certification}'"
             f")>"

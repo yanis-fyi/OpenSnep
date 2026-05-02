@@ -23,10 +23,10 @@ def top_artists(limit: int = 10) -> list[tuple[str, int]]:
     with Session(engine) as session:
         return (
             session.query(
-                Single.interprete,
+                Single.interprete_principal,
                 func.count(Single.id).label("count")
             )
-            .group_by(Single.interprete)
+            .group_by(Single.interprete_principal)
             .order_by(func.count(Single.id).desc())
             .limit(limit)
             .all()

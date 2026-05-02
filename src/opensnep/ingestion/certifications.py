@@ -78,38 +78,61 @@ def crawl_certifications(
     category: str = "Singles",
     sleep_seconds: float = 0.5,
 ) -> pd.DataFrame:
-    session = requests.Session()
-    session.headers.update({"User-Agent": "Mozilla/5.0"})
+    base_session = requests.Session()
+    base_session.headers.update({"User-Agent": "Mozilla/5.0"})
+
     total_pages = get_total_pages(
-        session=session,
+        session=base_session,
         year=year,
         category=category,
     )
 
     print(f"Found {total_pages} pages for {category} {year}")
+
     all_pages = []
+
     for page in range(1, total_pages + 1):
+        page_session = requests.Session()
+        page_session.headers.update({"User-Agent": "Mozilla/5.0"}) #use a fresh session per page
+
         url = build_page_url(year=year, category=category, page=page)
+
         print(f"Downloading {category} {year} - page {page}/{total_pages}")
-        page_response = session.get(url, timeout=30)
+
+        page_response = page_session.get(url, timeout=30)
         page_response.raise_for_status()
+
         csv_url = extract_csv_url(page_response.text)
+
+        time.sleep(2) # wait for server-side export/cache
+
         df_page = read_csv_from_url(
-            session=session,
+            session=page_session,
             csv_url=csv_url,
-            referer=url,
+            referer=page_response.url,
         )
+
+        print(page, df_page.shape)
+
         df_page["source_page"] = page
         df_page["source_year"] = year
         df_page["source_category"] = category
+
         all_pages.append(df_page)
+
         time.sleep(sleep_seconds)
+
     df_raw = pd.concat(all_pages, ignore_index=True)
+
     df_unique = (
         df_raw
         .drop_duplicates(subset=DATA_COLUMNS)
         .reset_index(drop=True)
     )
+
+    print("RAW SHAPE:", df_raw.shape)
+    print("UNIQUE SHAPE:", df_unique.shape)
+
     return df_unique
 
 #save file in processed data
