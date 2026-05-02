@@ -10,6 +10,11 @@ def create_tables() -> None:
 def load_singles(df) -> None:
     create_tables()
 
+    if df.empty:
+        print("No rows to load")
+        return
+    source_year = int(df["source_year"].iloc[0])
+
     records = []
 
     for _, row in df.iterrows():
@@ -28,7 +33,13 @@ def load_singles(df) -> None:
         records.append(record)
 
     with Session(engine) as session:
+        deleted = (
+            session.query(Single)
+            .filter(Single.source_year == source_year)
+            .delete()
+        )
         session.add_all(records)
         session.commit()
 
+    print(f"Replaced{deleted} existing rows for {source_year}")
     print(f"{len(records)} rows inserted into singles table")
