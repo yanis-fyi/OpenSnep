@@ -76,7 +76,7 @@ def read_csv_from_url(
 def crawl_certifications(
     year: int,
     category: str = "Singles",
-    sleep_seconds: float = 0.5,
+    sleep_seconds: float = 1,
 ) -> pd.DataFrame:
     base_session = requests.Session()
     base_session.headers.update({"User-Agent": "Mozilla/5.0"})
