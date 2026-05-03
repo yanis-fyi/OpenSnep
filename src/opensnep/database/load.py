@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 from opensnep.database.connection import engine
-from opensnep.database.models import Base, Single
+from opensnep.database.models import Base, Certification
 
 #creates table if missing
 def create_tables() -> None:
     Base.metadata.create_all(engine)
 
 #load data into
-def load_singles(df) -> None:
+def load_certifications(df) -> None:
     create_tables()
 
     if df.empty:
@@ -18,7 +18,7 @@ def load_singles(df) -> None:
     records = []
 
     for _, row in df.iterrows():
-        record = Single( 
+        record = Certification( 
             interprete=row["interprete"],
             interprete_principal=row["interprete_principal"],
             titre=row["titre"],
@@ -34,12 +34,12 @@ def load_singles(df) -> None:
 
     with Session(engine) as session:
         deleted = (
-            session.query(Single)
-            .filter(Single.source_year == source_year)
+            session.query(Certification)
+            .filter(Certification.source_year == source_year)
             .delete()
         )
         session.add_all(records)
         session.commit()
 
     print(f"Replaced {deleted} existing rows for {source_year}")
-    print(f"{len(records)} rows inserted into singles table")
+    print(f"{len(records)} rows inserted into certifications table")

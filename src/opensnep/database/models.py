@@ -8,8 +8,8 @@ class Base(DeclarativeBase):
     pass
 
 #Define one table
-class Single(Base): 
-    __tablename__ = "singles"
+class Certification(Base): 
+    __tablename__ = "certifications"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     interprete: Mapped[str] = mapped_column(String)
@@ -31,7 +31,7 @@ class Single(Base):
     #representation of an object    
     def __repr__(self) -> str:
         return (
-            f"<Single("
+            f"<Certification("
             f"interprete='{self.interprete}', "
             f"interprete_principal='{self.interprete_principal}', "
             f"titre='{self.titre}', "
