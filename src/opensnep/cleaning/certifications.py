@@ -36,9 +36,9 @@ COLLAB_MARKERS = [
     " FT. ",
     " FT ",
     " FEATURING ",
-    " X ",
-    " & ",
     ", ",
+    " & ",
+    " X ",
 ]
 
 

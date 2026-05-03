@@ -17,6 +17,7 @@ class Certification(Base):
     titre: Mapped[str] = mapped_column(String)
     editeur_distributeur: Mapped[str | None] = mapped_column(String, nullable=True)
     certification: Mapped[str] = mapped_column(String)
+    categorie: Mapped[str] = mapped_column(String)
 
     date_sortie: Mapped[datetime] = mapped_column(DateTime)
     date_constat: Mapped[datetime] = mapped_column(DateTime)

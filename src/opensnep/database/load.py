@@ -14,6 +14,7 @@ def load_certifications(df) -> None:
         print("No rows to load")
         return
     source_year = int(df["source_year"].iloc[0])
+    source_category = df["categorie"].iloc[0]
 
     records = []
 
@@ -24,6 +25,7 @@ def load_certifications(df) -> None:
             titre=row["titre"],
             editeur_distributeur=row["editeur_distributeur"],
             certification=row["certification"],
+            categorie=row["categorie"],
             date_sortie=row["date_sortie"],
             date_constat=row["date_constat"],
             source_page=row["source_page"],
@@ -36,6 +38,7 @@ def load_certifications(df) -> None:
         deleted = (
             session.query(Certification)
             .filter(Certification.source_year == source_year)
+            .filter(Certification.categorie == source_category)
             .delete()
         )
         session.add_all(records)
