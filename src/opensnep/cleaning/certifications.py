@@ -1,5 +1,5 @@
 import pandas as pd
-
+import re
 
 COLUMN_MAPPING = {
     "Interprete": "interprete",
@@ -30,24 +30,14 @@ DATE_COLUMNS = [
     "date_constat",
 ]
 
-COLLAB_MARKERS = [
-    " FEAT. ",
-    " FEAT ",
-    " FT. ",
-    " FT ",
-    " FEATURING ",
-    ", ",
-    " & ",
-    " X ",
-]
+COLLAB_PATTERN = re.compile(
+    r"\s*(?:FEAT\.?|FT\.?|FEATURING|,|&|X)\s*",
+    flags=re.IGNORECASE,
+)
 
 
 def extract_interprete_principal(interprete: str) -> str:
-    for marker in COLLAB_MARKERS:
-        if marker in interprete:
-            return interprete.split(marker)[0].strip()
-        
-    return interprete.strip()
+    return re.split(COLLAB_PATTERN, interprete, maxsplit=1)[0].strip()
 
 def clean_text_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()

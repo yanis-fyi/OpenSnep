@@ -28,7 +28,7 @@ def build_page_url(year: int, category: str, page: int) -> str:
 def get_total_pages(session: requests.Session, year: int, category: str) -> int:
     url = build_page_url(year=year, category=category, page=1)
 
-    response = session.get(url, timeout=30)
+    response = session.get(url, timeout=50)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
@@ -108,7 +108,7 @@ def crawl_certifications(
 
         print(f"Downloading {category} {year} - page {page}/{total_pages}")
 
-        page_response = page_session.get(url, timeout=30)
+        page_response = page_session.get(url, timeout=50)
         page_response.raise_for_status()
 
         df_page = parse_certifications_from_html(page_response.text)
