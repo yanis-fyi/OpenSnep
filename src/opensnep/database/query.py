@@ -28,6 +28,23 @@ def count_by_category() -> list[tuple[str, int]]:
         )
 
 
+#get certifaction levels
+def certification_by_levels(category: str | None = None) -> list[tuple[str, int]]:
+    with Session(engine) as session:
+            query = session.query(
+                Certification.certification,
+                func.count(Certification.id).label("count")
+            )
+            if category:
+                query = query.filter(func.lower(Certification.categorie) == category.lower)
+
+            return(
+            query
+            .group_by(Certification.certification)
+            .order_by(func.count(Certification.id).desc())
+            .all()
+        )
+
 #count nbr of certifications per year and category 
 def count_by_year(category: str | None = None) -> list[tuple[int, int]]:
     with Session(engine) as session:
