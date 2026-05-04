@@ -36,6 +36,7 @@ class Certification(Base):
             f"interprete='{self.interprete}', "
             f"interprete_principal='{self.interprete_principal}', "
             f"titre='{self.titre}', "
-            f"certification='{self.certification}'"
+            f"certification='{self.certification}', "
+            f"categorie='{self.categorie}'"
             f")>"
         )
