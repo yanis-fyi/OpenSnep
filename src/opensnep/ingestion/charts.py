@@ -1,21 +1,34 @@
-import requests 
+import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 
-BASE_CHART_URL = "https://snepmusique.com/les-tops/le-top-de-la-semaine"
 
-CHART_SLUGS = {
-    "top_albums": "top-albums",
-    "top_singles": "top-singles",
-    "top_albums_classique": "top-albums-classique",
-    "top_albums_jazz": "top-albums-jazz",
-    "top_rock_metal": "top-rock-metal",
-    "top_albums_physiques": "top-albums-physiques",
+BASE_CHART_URL = (
+    "https://snepmusique.com/les-tops/le-top-de-la-semaine/top-albums/"
+)
+
+CHART_CATEGORIES = {
+    "Top Albums": None,
+    "Top Singles": "Top%20Singles",
+    "Top Albums Classique": "Top%20Albums%20Classique",
+    "Top Albums Jazz": "Top%20Albums%20Jazz",
+    "Top Rock & Metal": "Top%20Rock%20%2526%20Metal",
+    "Top Albums Physiques": "Top%20Albums%20Physiques",
 }
 
 
-def build_chart_url(chart_slug: str, year: int, week: int) -> str:
-    return f"{BASE_CHART_URL}/{chart_slug}/?annee={year}&semaine={week}"
+def build_chart_url(chart_name: str, year: int, week: int) -> str:
+    if chart_name not in CHART_CATEGORIES:
+        raise ValueError(f"Unknown chart name: {chart_name}")
+
+    url = f"{BASE_CHART_URL}?annee={year}&semaine={week}"
+
+    category_param = CHART_CATEGORIES[chart_name]
+
+    if category_param:
+        url += f"&categorie={category_param}"
+
+    return url
 
 
 def parse_chart_html(html: str) -> pd.DataFrame:
@@ -34,24 +47,21 @@ def parse_chart_html(html: str) -> pd.DataFrame:
                 "title": get_text(".titre"),
                 "artist": get_text(".artiste"),
                 "label_distributor": get_text(".editeur"),
-                
             }
         )
 
     return pd.DataFrame(records)
 
 
-
 def crawl_chart(
-    chart_slug: str,
+    chart_name: str,
     year: int,
     week: int,
-
 ) -> pd.DataFrame:
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0"})
 
-    url = build_chart_url(chart_slug, year, week)
+    url = build_chart_url(chart_name, year, week)
 
     response = session.get(url, timeout=50)
     response.raise_for_status()
@@ -59,11 +69,12 @@ def crawl_chart(
     df = parse_chart_html(response.text)
 
     if df.empty:
-        raise ValueError(f"No chart item found for {chart_slug} {year} week {week}")
-    
-    df["chart_slug"] = chart_slug
+        raise ValueError(
+            f"No chart item found for {chart_name} {year} week {week}"
+        )
+
+    df["chart_name"] = chart_name
     df["source_year"] = year
     df["source_week"] = week
-    df["source_url"] = url
 
     return df

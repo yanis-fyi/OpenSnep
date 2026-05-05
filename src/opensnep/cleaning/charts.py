@@ -10,9 +10,17 @@ TEXT_COLUMNS = [
     "chart_name",
     "artist",
     "title",
-    "label",
+    "label_distributor",
 ]
 
+CHART_NAMES = {
+    "top-albums": "Top Albums",
+    "top-singles": "Top Singles",
+    "top-albums-classique": "Top Albums Classique",
+    "top-albums-jazz": "Top Albums Jazz",
+    "top-rock-metal": "Top Rock & Metal",
+    "top-albums-physiques": "Top Albums Physiques",
+}
 
 def clean_charts(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -27,7 +35,7 @@ def clean_charts(df: pd.DataFrame) -> pd.DataFrame:
             .str.strip()
             .str.replace(r"\s+", " ", regex=True)
         )
-
+    df["chart_name"] = (df["chart_name"].map(CHART_NAMES).fillna(df["chart_name"]))
     df["rank"] = pd.to_numeric(df["rank"], errors="coerce").astype("Int64")
     df["week"] = pd.to_numeric(df["week"], errors="coerce").astype("Int64")
     df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
