@@ -165,3 +165,18 @@ def search_certifications(
             )
 
         return query.all()
+
+def get_artist(
+        name: str,
+        category: str | None = None,
+) -> list[Certification]:
+    with Session(engine) as session:
+        query = session.query(Certification).filter(
+            func.lower(Certification.interprete_principal) == name.lower()
+        )
+        if category:
+            query = query.filter(
+                func.lower(Certification.categorie) == category.lower()
+            )
+
+        return query.all()
