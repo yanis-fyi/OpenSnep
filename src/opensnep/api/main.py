@@ -140,3 +140,80 @@ def artist_certification_levels(
         }
         for certification, count in rows
     ]
+
+@app.get("/charts", tags=["Charts"])
+def charts(
+    chart_name: str | None = None,
+    rank: int | None = None,
+    artist: str | None = None,
+    title: str | None = None,
+    label_distributor: str | None = None,
+    week: int | None = None,
+    year: int | None = None,
+):
+    rows = query.search_charts(
+        chart_name=chart_name,
+        rank=rank,
+        artist=artist,
+        title=title,
+        label_distributor=label_distributor,
+        week=week,
+        year=year,
+    )
+    return rows
+
+@app.get("/charts/count", tags=["Charts"])
+def chart_entries_count(
+    chart_name: str | None = None,
+):
+    return {
+        "count": query.count_chart_entries(chart_name)
+    }
+
+@app.get("/charts/week", tags=["Charts"])
+def charts_week(
+    chart_name: str,
+    week: int,
+    year: int,
+):
+    rows = query.get_chart_week(
+        chart_name=chart_name,
+        week=week,
+        year=year,
+    )
+
+    return rows
+
+@app.get("/stats/charts/top-artists", tags=["Stats"])
+def charts_top_artists(
+    chart_name: str | None = None,
+    limit: int = 10
+):
+    rows = query.top_chart_artists(
+        chart_name=chart_name,
+        limit=limit
+    )
+    return [
+        {
+        "artist": artist,
+        "count": count,
+        } 
+        for artist, count in rows
+    ] 
+
+@app.get("/stats/charts/top-distributors", tags=["Stats"])
+def charts_top_distributors(
+    chart_name: str | None = None,
+    limit: int = 10
+):
+    rows = query.top_chart_distributors(
+        chart_name=chart_name,
+        limit=limit
+    )
+    return [
+        {
+        "label_distributor": label_distributor,
+        "count": count,
+        } 
+        for label_distributor, count in rows
+    ] 
