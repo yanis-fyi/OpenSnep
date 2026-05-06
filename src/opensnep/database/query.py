@@ -334,6 +334,29 @@ def entries_at_number_one(
             .limit(limit)
             .all()
         )
+# get artist chart history
+def artist_chart_history(
+    artist: str,
+    chart_name: str | None = None,
+) -> list[ChartEntry]:
+    with Session(engine) as session:
+        query = session.query(ChartEntry).filter(
+            func.lower(ChartEntry.artist) == artist.lower()
+        )
 
+        if chart_name:
+            query = query.filter(
+                func.lower(ChartEntry.chart_name) == chart_name.lower()
+            )
+
+        return (
+            query
+            .order_by(
+                ChartEntry.year.asc(),
+                ChartEntry.week.asc(),
+                ChartEntry.rank.asc(),
+            )
+            .all()
+        )
 
         

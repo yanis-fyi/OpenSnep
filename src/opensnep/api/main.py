@@ -17,6 +17,7 @@ def root():
             "certifications": "/certifications",
             "artists": "/artists/{name}",
             "stats": "/stats",
+            "charts": "/charts",
             "docs": "/docs",
 
         },
@@ -217,3 +218,41 @@ def charts_top_distributors(
         } 
         for label_distributor, count in rows
     ] 
+
+@app.get("/stats/charts/number-ones", tags=["Stats"])
+def charts_number_ones(
+    artist: str | None = None,
+    chart_name: str | None = None,
+    limit: int = 10,
+):
+    rows = query.entries_at_number_one(
+        artist=artist,
+        chart_name=chart_name,
+        limit=limit,
+    )
+
+    if artist:
+        return {
+            "artist": artist,
+            "chart_name": chart_name,
+            "weeks_at_number_one": rows,
+        }
+
+    return [
+        {
+            "artist": artist_name,
+            "weeks_at_number_one": count,
+        }
+        for artist_name, count in rows
+    ]
+
+
+@app.get("/artists/{name}/charts", tags=["Artists"])
+def artist_charts(
+    name: str,
+    chart_name: str | None = None,
+):
+    return query.artist_chart_history(
+        artist=name,
+        chart_name=chart_name,
+    )
