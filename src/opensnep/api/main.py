@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from opensnep.database import query
 from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
 from opensnep.api.schemas import ChartName, CategoryName
@@ -8,6 +8,12 @@ app = FastAPI(title="OpenSnep API",
               version="0.1.0",
 
 )
+
+def certifications_count(category: CategoryName | None = None):
+    return {
+        "count": query.count_certifications(category)
+    }
+
 # =======
 # Root
 # =======
@@ -30,6 +36,10 @@ def root():
         ],
     }
 
+def raise_404_if_empty(rows, message: str):
+    if not rows:
+        raise HTTPException(status_code=404, detail=message)
+    
 # ================
 # Certifications
 # ================
@@ -39,10 +49,6 @@ def root():
          response_model=CountResponse,
          summary="Count certification entries",
          description="Returns total number of certifications, optionally filtered by category")
-def certifications_count(category: CategoryName | None = None):
-    return {
-        "count": query.count_certifications(category)
-    }
 
 @app.get("/certifications",
         tags=["Certifications"],
@@ -109,31 +115,46 @@ def artist(
         skip=skip,
         limit=limit,
     )
+
+    raise_404_if_empty(
+        rows,
+        "No certifications found for artist '{name}.",
+    )
     return rows
 
-@app.get("/artists/{name}/charts",
-        tags=["Artists"],
-        response_model=list[ChartEntryResponse],
-        summary="Get artist chart history",
-        description="""
+
+@app.get(
+    "/artists/{name}/charts",
+    tags=["Artists"],
+    response_model=list[ChartEntryResponse],
+    summary="Get artist chart history",
+    description="""
 Return weekly chart history for a specific artist.
 
 Optionally filter by chart name.
 
 Supports pagination with `skip` and `limit`.
-        """)
+""",
+)
 def artist_charts(
     name: str,
     chart_name: ChartName | None = None,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
 ):
-    return query.artist_chart_history(
+    rows = query.artist_chart_history(
         artist=name,
         chart_name=chart_name.value if chart_name else None,
         skip=skip,
         limit=limit,
     )
+
+    raise_404_if_empty(
+        rows,
+        f"No chart history found for artist '{name}'.",
+    )
+    return rows
+
 
 @app.get("/artists/{name}/certifications",
         tags=["Artists"],
@@ -209,6 +230,7 @@ def charts(
     )
     return rows
 
+
 @app.get("/charts/count", 
          tags=["Charts"], 
          response_model=CountResponse, 
@@ -220,6 +242,7 @@ def chart_entries_count(
     return {
         "count": query.count_chart_entries(chart_name)
     }
+
 
 @app.get("/charts/week",
         tags=["Charts"],
@@ -244,7 +267,10 @@ def charts_week(
         week=week,
         year=year,
     )
-
+    raise_404_if_empty(
+        rows,
+        "No chart entries found for this chart, year and week.",
+    )
     return rows
 
 # =========
@@ -272,6 +298,7 @@ def charts_top_artists(
         for artist, count in rows
     ] 
 
+
 @app.get("/stats/charts/top-distributors",
         tags=["Stats"],
         response_model=list[LabelCountResponse],
@@ -296,6 +323,7 @@ def charts_top_distributors(
         } 
         for label_distributor, count in rows
     ] 
+
 
 @app.get("/stats/charts/number-ones",
         tags=["Stats"],
@@ -354,6 +382,7 @@ def stats_by_category():
         for category, count in rows
     ]
 
+
 @app.get("/stats/by-year",
         tags=["Stats"],
         response_model=list[YearCountResponse],
@@ -368,6 +397,7 @@ def stats_by_year():
         }
         for year, count in rows
     ]
+
 
 @app.get("/stats/top-artists",
         tags=["Stats"],
@@ -394,6 +424,7 @@ def stats_top_artists(
         for artist, count in rows
     ]
 
+
 @app.get("/stats/top-distributors",
         tags=["Stats"],
         response_model=list[LabelCountResponse],
@@ -418,6 +449,7 @@ def stats_top_distributors(
         }
         for label_distributor, count in rows
     ]
+
 
 @app.get("/stats/certification-levels",
         tags=["Stats"],

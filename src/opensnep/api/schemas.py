@@ -69,6 +69,7 @@ class ChartName(str, Enum):
     top_albums_jazz = "Top Albums Jazz"
     top_rock_metal = "Top Rock & Metal"
     top_albums_physiques = "Top Albums Physiques"
+    top_radio = "Top Radio"
 
 class CategoryName(str, Enum):
      singles = "Singles"

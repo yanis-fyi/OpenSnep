@@ -3,7 +3,11 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 
-BASE_CHART_URL = (
+BASE_WEEKLY_CHART_URL = (
+    "https://snepmusique.com/les-tops/le-top-de-la-semaine/top-albums/"
+)
+
+BASE_RADIO_CHART_URL = (
     "https://snepmusique.com/les-tops/le-top-de-la-semaine/top-albums/"
 )
 
@@ -14,14 +18,18 @@ CHART_CATEGORIES = {
     "Top Albums Jazz": "Top%20Albums%20Jazz",
     "Top Rock & Metal": "Top%20Rock%20%2526%20Metal",
     "Top Albums Physiques": "Top%20Albums%20Physiques",
+    "Top Radio": None,
 }
 
 
 def build_chart_url(chart_name: str, year: int, week: int) -> str:
     if chart_name not in CHART_CATEGORIES:
         raise ValueError(f"Unknown chart name: {chart_name}")
+    
+    if chart_name == "Top Radio":
+        return f"{BASE_RADIO_CHART_URL}?annee={year}&semaine={week}"
 
-    url = f"{BASE_CHART_URL}?annee={year}&semaine={week}"
+    url = f"{BASE_WEEKLY_CHART_URL}?annee={year}&semaine={week}"
 
     category_param = CHART_CATEGORIES[chart_name]
 
