@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from opensnep.database import query
+from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
 
 app = FastAPI(title="OpenSnep API",
               description="Open data API for French music certifications and charts",
               version="0.1.0",
 
 )
+# =======
+# Root
+# =======
 
 @app.get("/", tags=["Root"])
 def root():
@@ -23,81 +27,20 @@ def root():
         },
     }
 
-@app.get("/certifications/count", tags=["Certifications"])
+# ================
+# Certifications
+# ================
+
+@app.get("/certifications/count", tags=["Certifications"], response_model=CountResponse)
 def certifications_count(category: str | None = None):
     return {
         "count": query.count_certifications(category)
     }
 
-@app.get("/stats/by-category", tags=["Stats"])
-def stats_by_category():
-    rows = query.count_by_category()
-    return [
-        {
-            "category": category,
-            "count": count,
-        }
-        for category, count in rows
-    ]
-
-@app.get("/stats/by-year", tags=["Stats"])
-def stats_by_year():
-    rows = query.count_by_year()
-    return [
-        {
-            "year": year,
-            "count": count,
-        }
-        for year, count in rows
-    ]
-
-@app.get("/stats/top-artists", tags=["Stats"])
-def stats_top_artists(
-    category: str | None = None,
-    limit: int = 10,
-):
-    rows = query.top_artists(
-        category=category,
-        limit=limit,
-    )
-    return [
-        {
-            "artist": artist,
-            "count": count,
-        }
-        for artist, count in rows
-    ]
-
-@app.get("/stats/top-distributors", tags=["Stats"])
-def stats_top_distributors(
-    category: str | None = None,
-    limit: int = 10,
-):
-    rows = query.top_distributors(
-        category=category,
-        limit=limit,
-    )
-    return [
-        {
-            "label_distributor": label_distributor,
-            "count": count,
-        }
-        for label_distributor, count in rows
-    ]
-
-@app.get("/stats/certification-levels", tags=["Stats"])
-def stats_certification_levels(category: str | None = None):
-    rows = query.certification_by_levels(category=category)
-
-    return [
-        {
-            "certification": certification,
-            "count": count,
-        }
-        for certification, count in rows
-    ]
-
-@app.get("/certifications", tags=["Certifications"])
+@app.get("/certifications",
+        tags=["Certifications"],
+        response_model=list[CertificationResponse]
+)
 def certifications(
     artist: str | None = None,
     title: str | None = None,
@@ -114,7 +57,15 @@ def certifications(
     )
     return rows
 
-@app.get("/artists/{name}", tags=["Artists"])
+
+
+# ==========
+# Artists
+# ==========
+
+@app.get("/artists/{name}",
+        tags=["Artists"],
+        response_model=list[CertificationResponse])
 def artist(
     name: str,
     category: str | None = None,
@@ -125,7 +76,21 @@ def artist(
     )
     return rows
 
-@app.get("/artists/{name}/certifications", tags=["Artists"])
+@app.get("/artists/{name}/charts",
+        tags=["Artists"],
+        response_model=list[ChartEntryResponse])
+def artist_charts(
+    name: str,
+    chart_name: str | None = None,
+):
+    return query.artist_chart_history(
+        artist=name,
+        chart_name=chart_name,
+    )
+
+@app.get("/artists/{name}/certifications",
+        tags=["Artists"],
+        response_model=list[CertificationLevelResponse])
 def artist_certification_levels(
     name: str,
     category: str | None = None,
@@ -142,7 +107,14 @@ def artist_certification_levels(
         for certification, count in rows
     ]
 
-@app.get("/charts", tags=["Charts"])
+# =========
+# Charts
+# =========
+
+@app.get("/charts",
+        tags=["Charts"],
+        response_model=list[ChartEntryResponse]
+)
 def charts(
     chart_name: str | None = None,
     rank: int | None = None,
@@ -163,7 +135,7 @@ def charts(
     )
     return rows
 
-@app.get("/charts/count", tags=["Charts"])
+@app.get("/charts/count", tags=["Charts"], response_model=CountResponse)
 def chart_entries_count(
     chart_name: str | None = None,
 ):
@@ -171,7 +143,9 @@ def chart_entries_count(
         "count": query.count_chart_entries(chart_name)
     }
 
-@app.get("/charts/week", tags=["Charts"])
+@app.get("/charts/week",
+        tags=["Charts"],
+        response_model=list[ChartEntryResponse])
 def charts_week(
     chart_name: str,
     week: int,
@@ -185,7 +159,13 @@ def charts_week(
 
     return rows
 
-@app.get("/stats/charts/top-artists", tags=["Stats"])
+# =========
+# Stats
+# =========
+
+@app.get("/stats/charts/top-artists",
+        tags=["Stats"],
+        response_model=list[ArtistCountResponse])
 def charts_top_artists(
     chart_name: str | None = None,
     limit: int = 10
@@ -202,7 +182,9 @@ def charts_top_artists(
         for artist, count in rows
     ] 
 
-@app.get("/stats/charts/top-distributors", tags=["Stats"])
+@app.get("/stats/charts/top-distributors",
+        tags=["Stats"],
+        response_model=list[LabelCountResponse])
 def charts_top_distributors(
     chart_name: str | None = None,
     limit: int = 10
@@ -219,7 +201,9 @@ def charts_top_distributors(
         for label_distributor, count in rows
     ] 
 
-@app.get("/stats/charts/number-ones", tags=["Stats"])
+@app.get("/stats/charts/number-ones",
+        tags=["Stats"],
+        response_model=list[NumberOneEntriesResponse])
 def charts_number_ones(
     artist: str | None = None,
     chart_name: str | None = None,
@@ -232,27 +216,98 @@ def charts_number_ones(
     )
 
     if artist:
-        return {
+        return [
+            {
             "artist": artist,
             "chart_name": chart_name,
             "weeks_at_number_one": rows,
-        }
+            }
+        ]
 
     return [
-        {
+        {    
             "artist": artist_name,
+            "chart_name": chart_name,
             "weeks_at_number_one": count,
         }
         for artist_name, count in rows
     ]
 
 
-@app.get("/artists/{name}/charts", tags=["Artists"])
-def artist_charts(
-    name: str,
-    chart_name: str | None = None,
+@app.get("/stats/by-category",
+        tags=["Stats"],
+        response_model=list[CategoryCountResponse])
+def stats_by_category():
+    rows = query.count_by_category()
+    return [
+        {
+            "category": category,
+            "count": count,
+        }
+        for category, count in rows
+    ]
+
+@app.get("/stats/by-year",
+        tags=["Stats"],
+        response_model=list[YearCountResponse])
+def stats_by_year():
+    rows = query.count_by_year()
+    return [
+        {
+            "year": year,
+            "count": count,
+        }
+        for year, count in rows
+    ]
+
+@app.get("/stats/top-artists",
+        tags=["Stats"],
+        response_model=list[ArtistCountResponse])
+def stats_top_artists(
+    category: str | None = None,
+    limit: int = 10,
 ):
-    return query.artist_chart_history(
-        artist=name,
-        chart_name=chart_name,
+    rows = query.top_artists(
+        category=category,
+        limit=limit,
     )
+    return [
+        {
+            "artist": artist,
+            "count": count,
+        }
+        for artist, count in rows
+    ]
+
+@app.get("/stats/top-distributors",
+        tags=["Stats"],
+        response_model=list[LabelCountResponse])
+def stats_top_distributors(
+    category: str | None = None,
+    limit: int = 10,
+):
+    rows = query.top_distributors(
+        category=category,
+        limit=limit,
+    )
+    return [
+        {
+            "label_distributor": label_distributor,
+            "count": count,
+        }
+        for label_distributor, count in rows
+    ]
+
+@app.get("/stats/certification-levels",
+        tags=["Stats"],
+        response_model=list[CertificationLevelResponse])
+def stats_certification_levels(category: str | None = None):
+    rows = query.certification_by_levels(category=category)
+
+    return [
+        {
+            "certification": certification,
+            "count": count,
+        }
+        for certification, count in rows ]
+
