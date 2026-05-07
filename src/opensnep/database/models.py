@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import String, Integer, DateTime, Index
+from sqlalchemy import String, Integer, DateTime, Index, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 
@@ -17,6 +17,16 @@ class Certification(Base):
         Index("idx_cert_year", "source_year"),
         Index("idx_cert_certification", "certification"),
         Index("idx_cert_distributor", "editeur_distributeur"),
+
+        UniqueConstraint(
+            "interprete",
+            "titre",
+            "certification",
+            "categorie",
+            "date_constat",
+            name="uq_certification_record",
+
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -60,6 +70,14 @@ class ChartEntry(Base):
         Index("idx_chart_year_week", "year", "week"),
         Index("idx_chart_rank", "rank"),
         Index("idx_chart_distributor", "label_distributor"),
+
+        UniqueConstraint(
+            "chart_name",
+            "year",
+            "week",
+            "rank",
+            name="uq_chart_week_rank"
+        )
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
