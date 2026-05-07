@@ -1,0 +1,21 @@
+2026-05-07 22:15:15,232 | INFO | Updating Top Albums | 2026 week 19
+2026-05-07 22:15:15,811 | ERROR | FAILED Top Albums | 2026 week 19: No chart item found for Top Albums 2026 week 19
+2026-05-07 22:15:15,812 | INFO | Updating Top Singles | 2026 week 19
+2026-05-07 22:15:16,451 | ERROR | FAILED Top Singles | 2026 week 19: No chart item found for Top Singles 2026 week 19
+2026-05-07 22:15:16,451 | INFO | Updating Top Albums Classique | 2026 week 19
+2026-05-07 22:15:16,977 | ERROR | FAILED Top Albums Classique | 2026 week 19: No chart item found for Top Albums Classique 2026 week 19
+2026-05-07 22:15:16,978 | INFO | Updating Top Albums Jazz | 2026 week 19
+2026-05-07 22:15:17,487 | ERROR | FAILED Top Albums Jazz | 2026 week 19: No chart item found for Top Albums Jazz 2026 week 19
+2026-05-07 22:15:17,488 | INFO | Updating Top Rock & Metal | 2026 week 19
+2026-05-07 22:15:18,040 | ERROR | FAILED Top Rock & Metal | 2026 week 19: No chart item found for Top Rock & Metal 2026 week 19
+2026-05-07 22:15:18,041 | INFO | Updating Top Albums Physiques | 2026 week 19
+2026-05-07 22:15:18,516 | ERROR | FAILED Top Albums Physiques | 2026 week 19: No chart item found for Top Albums Physiques 2026 week 19
+2026-05-07 22:15:18,516 | INFO | Failed: [('Top Albums', 2026, 19, 'No chart item found for Top Albums 2026 week 19'), ('Top Singles', 2026, 19, 'No chart item found for Top Singles 2026 week 19'), ('Top Albums Classique', 2026, 19, 'No chart item found for Top Albums Classique 2026 week 19'), ('Top Albums Jazz', 2026, 19, 'No chart item found for Top Albums Jazz 2026 week 19'), ('Top Rock & Metal', 2026, 19, 'No chart item found for Top Rock & Metal 2026 week 19'), ('Top Albums Physiques', 2026, 19, 'No chart item found for Top Albums Physiques 2026 week 19')]
+2026-05-07 22:15:18,516 | INFO | Current week unavailable, trying previous week...
+2026-05-07 22:15:18,516 | INFO | Updating Top Albums | 2026 week 18
+2026-05-07 22:15:21,191 | INFO | Updating Top Singles | 2026 week 18
+2026-05-07 22:15:23,829 | INFO | Updating Top Albums Classique | 2026 week 18
+2026-05-07 22:15:26,402 | INFO | Updating Top Albums Jazz | 2026 week 18
+2026-05-07 22:15:28,925 | INFO | Updating Top Rock & Metal | 2026 week 18
+2026-05-07 22:15:31,544 | INFO | Updating Top Albums Physiques | 2026 week 18
+2026-05-07 22:15:34,274 | INFO | Failed: []
