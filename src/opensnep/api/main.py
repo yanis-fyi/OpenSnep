@@ -20,14 +20,14 @@ def root():
         "name": "OpenSnep API",
         "version": "0.1.0",
         "description": "French music data API powered by SNEP charts and certifications",
-        "resources": {
-            "certifications": "/certifications",
-            "artists": "/artists/{name}",
-            "stats": "/stats",
-            "charts": "/charts",
-            "docs": "/docs",
+        "documentation": "/docs",
+        "resources": [
+            "/certifications",
+            "/charts",
+            "/artists/JUL",
+            "/stats/top-artists",
 
-        },
+        ],
     }
 
 # ================
@@ -91,11 +91,11 @@ def certifications(
         response_model=list[CertificationResponse],
         summary="Get artist certifications",
         description="""
-        Return certification records for a specific artist.
+Return certification records for a specific artist.
 
-        Optionally filter by category.
+Optionally filter by category.
 
-        Supports pagination with `skip` and `limit`.
+Supports pagination with `skip` and `limit`.
 """)
 def artist(
     name: str,
@@ -116,11 +116,11 @@ def artist(
         response_model=list[ChartEntryResponse],
         summary="Get artist chart history",
         description="""
-        Return weekly chart history for a specific artist.
+Return weekly chart history for a specific artist.
 
-        Optionally filter by chart name.
+Optionally filter by chart name.
 
-        Supports pagination with `skip` and `limit`.
+Supports pagination with `skip` and `limit`.
         """)
 def artist_charts(
     name: str,
@@ -140,12 +140,12 @@ def artist_charts(
         response_model=list[CertificationLevelResponse],
         summary="Get artist certification levels",
         description="""
-        Return certification level breakdown for a specific artist.
+Return certification level breakdown for a specific artist.
 
-        Example:
-        - Or: 12
-        - Platine: 8
-        - Diamant: 2
+Example:
+- Or: 12
+- Platine: 8
+- Diamant: 2
 """)
 def artist_certification_levels(
     name: str,
@@ -226,13 +226,13 @@ def chart_entries_count(
         response_model=list[ChartEntryResponse],
         summary="Get weekly chart snapshot",
         description="""
-        Return a full weekly chart ranking for a given:
+Return a full weekly chart ranking for a given:
 
-        - chart_name
-        - year
-        - week
+- chart_name
+- year
+- week
 
-        Results are ordered by rank ascending.
+Results are ordered by rank ascending.
 """)
 def charts_week(
     chart_name: ChartName,
@@ -277,9 +277,9 @@ def charts_top_artists(
         response_model=list[LabelCountResponse],
         summary="Top chart distributors",
         description="""
-        Return labels / distributors with the highest number of chart entries.
+Return labels / distributors with the highest number of chart entries.
 
-        Optionally filter by chart name.
+Optionally filter by chart name.
 """)
 def charts_top_distributors(
     chart_name: ChartName | None = None,
@@ -302,11 +302,11 @@ def charts_top_distributors(
         response_model=list[NumberOneEntriesResponse],
         summary="Number one chart entries",
         description="""
-        Return artists with the most number one chart entries.
+Return artists with the most number one chart entries.
 
-        Can filter by:
-        - artist
-        - chart_name
+Can filter by:
+- artist
+- chart_name
 """)
 def charts_number_ones(
     artist: str | None = None,
@@ -374,9 +374,9 @@ def stats_by_year():
         response_model=list[ArtistCountResponse],
         summary="Top certified artists",
         description="""
-        Return artists with the highest number of certifications.
+Return artists with the highest number of certifications.
 
-        Optionally filter by category.
+Optionally filter by category.
 """)
 def stats_top_artists(
     category: CategoryName | None = None,
@@ -399,9 +399,9 @@ def stats_top_artists(
         response_model=list[LabelCountResponse],
         summary="Top distributors by certifications",
         description="""
-        Return distributors / labels with the highest number of certifications.
+Return distributors / labels with the highest number of certifications.
 
-        Optionally filter by category.
+Optionally filter by category.
 """)
 def stats_top_distributors(
     category: CategoryName | None = None,
@@ -424,12 +424,12 @@ def stats_top_distributors(
         response_model=list[CertificationLevelResponse],
         summary="Certification level breakdown",
         description="""
-        Return counts by certification level.
+Return counts by certification level.
 
-        Example:
-        - Or
-        - Platine
-        - Diamant
+Example:
+- Or
+- Platine
+- Diamant
 """)
 def stats_certification_levels(category: CategoryName | None = None):
     rows = query.certification_by_levels(category=category.value if category else None)

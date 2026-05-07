@@ -40,7 +40,7 @@ def certification_by_levels(category: str | None = None) -> list[tuple[str, int]
                 func.count(Certification.id).label("count")
             )
             if category:
-                query = query.filter(func.lower(Certification.categorie) == category.lower)
+                query = query.filter(func.lower(Certification.categorie) == category.lower())
 
             return(
             query
@@ -194,7 +194,7 @@ def get_artist(
 
         return (
             query
-            .skip(skip)
+            .offset(skip)
             .limit(limit)
             .all()
         )
@@ -312,7 +312,7 @@ def top_chart_distributors(
             func.count(ChartEntry.id).label("count"),
         )
         if chart_name:
-            query = query.filter(func.lower(chart_name) == chart_name.lower)
+            query = query.filter(func.lower(chart_name) == chart_name.lower())
 
         return (
             query
