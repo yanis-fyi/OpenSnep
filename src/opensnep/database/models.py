@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import String, Integer, DateTime
+from sqlalchemy import String, Integer, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 
@@ -10,6 +10,15 @@ class Base(DeclarativeBase):
 #Define certifications table
 class Certification(Base): 
     __tablename__ = "certifications"
+
+    __table_args__ =(
+        Index("idx_cert_artist", "interprete_principal"),
+        Index("idx_cert_category", "categorie"),
+        Index("idx_cert_year", "source_year"),
+        Index("idx_cert_certification", "certification"),
+        Index("idx_cert_distributor", "editeur_distributeur"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     interprete: Mapped[str] = mapped_column(String)
@@ -44,6 +53,15 @@ class Certification(Base):
 #define charts table
 class ChartEntry(Base):
     __tablename__ = "charts"
+
+    __tables_args__ = (
+        Index("idx_chart_name", "chart_name"),
+        Index("idx_chart_artist", "artist"),
+        Index("idx_chart_year_week", "year", "week"),
+        Index("idx_chart_rank", "rank"),
+        Index("idx_chart_distributor", "label_distributor"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     chart_name: Mapped[str] = mapped_column(String)
