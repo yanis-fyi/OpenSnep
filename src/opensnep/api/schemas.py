@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date
+from enum import Enum
 
 
 
@@ -60,3 +61,15 @@ class NumberOneEntriesResponse(BaseModel):
      artist: str
      chart_name: str | None
      weeks_at_number_one: int
+
+class ChartName(str, Enum):
+    top_albums = "Top Albums"
+    top_singles = "Top Singles"
+    top_albums_classique = "Top Albums Classique"
+    top_albums_jazz = "Top Albums Jazz"
+    top_rock_metal = "Top Rock & Metal"
+    top_albums_physiques = "Top Albums Physiques"
+
+class CategoryName(str, Enum):
+     singles = "Singles"
+     albums = "Albums"

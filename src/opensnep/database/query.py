@@ -138,7 +138,9 @@ def search_certifications(
         title: str | None = None,
         category: str | None = None,
         year: int | None = None,
-        certification: str | None = None, 
+        certification: str | None = None,
+        skip: int = 0,
+        limit: int = 100, 
 ) -> list[Certification]:
     with Session(engine) as session:
         query = session.query(Certification)
@@ -168,11 +170,18 @@ def search_certifications(
                 func.lower(Certification.certification) == certification.lower()
             )
 
-        return query.all()
+        return (
+            query
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
 def get_artist(
         name: str,
         category: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
 ) -> list[Certification]:
     with Session(engine) as session:
         query = session.query(Certification).filter(
@@ -183,7 +192,12 @@ def get_artist(
                 func.lower(Certification.categorie) == category.lower()
             )
 
-        return query.all()
+        return (
+            query
+            .skip(skip)
+            .limit(limit)
+            .all()
+        )
     
 # ===============
 # Charts queries
@@ -208,6 +222,8 @@ def search_charts(
         label_distributor: str | None = None,
         week: int | None = None,
         year: int | None = None,
+        skip: int = 0,
+        limit: int = 100,
                   
 ) -> list[ChartEntry]:
     with Session(engine) as session:
@@ -241,7 +257,12 @@ def search_charts(
             query = query.filter(
                 ChartEntry.year == year)
             
-        return query.all()
+        return (
+            query
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
 # get one chart snapshot
 def get_chart_week(
@@ -338,6 +359,8 @@ def entries_at_number_one(
 def artist_chart_history(
     artist: str,
     chart_name: str | None = None,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[ChartEntry]:
     with Session(engine) as session:
         query = session.query(ChartEntry).filter(
@@ -356,6 +379,8 @@ def artist_chart_history(
                 ChartEntry.week.asc(),
                 ChartEntry.rank.asc(),
             )
+            .offset(skip)
+            .limit(limit)
             .all()
         )
 

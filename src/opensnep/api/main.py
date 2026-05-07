@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from opensnep.database import query
 from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
+from opensnep.api.schemas import ChartName, CategoryName
 
 app = FastAPI(title="OpenSnep API",
               description="Open data API for French music certifications and charts",
@@ -11,7 +12,9 @@ app = FastAPI(title="OpenSnep API",
 # Root
 # =======
 
-@app.get("/", tags=["Root"])
+@app.get("/", tags=["Root"], 
+         summary="API overview", 
+         description="Returns general information about OpenSnep and available resources.")
 def root():
     return {
         "name": "OpenSnep API",
@@ -31,29 +34,49 @@ def root():
 # Certifications
 # ================
 
-@app.get("/certifications/count", tags=["Certifications"], response_model=CountResponse)
-def certifications_count(category: str | None = None):
+@app.get("/certifications/count", 
+         tags=["Certifications"], 
+         response_model=CountResponse,
+         summary="Count certification entries",
+         description="Returns total number of certifications, optionally filtered by category")
+def certifications_count(category: CategoryName | None = None):
     return {
         "count": query.count_certifications(category)
     }
 
 @app.get("/certifications",
         tags=["Certifications"],
-        response_model=list[CertificationResponse]
+        response_model=list[CertificationResponse],
+        summary="Search certification entries",
+        description="""
+Filter certification entries by:
+
+- artist
+- title
+- category
+- year
+- certification
+
+Supports pagination with `skip` and `limit`.
+"""
 )
 def certifications(
     artist: str | None = None,
     title: str | None = None,
-    category: str | None = None,
+    category: CategoryName | None = None,
     year: int | None = None,
     certification: str | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
 ):
     rows = query.search_certifications(
         artist=artist,
         title=title,
-        category=category,
+        category=category.value if category else None,
         year=year,
         certification=certification,
+        skip=skip,
+        limit=limit,
     )
     return rows
 
@@ -65,39 +88,72 @@ def certifications(
 
 @app.get("/artists/{name}",
         tags=["Artists"],
-        response_model=list[CertificationResponse])
+        response_model=list[CertificationResponse],
+        summary="Get artist certifications",
+        description="""
+        Return certification records for a specific artist.
+
+        Optionally filter by category.
+
+        Supports pagination with `skip` and `limit`.
+""")
 def artist(
     name: str,
-    category: str | None = None,
+    category: CategoryName | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
 ):
     rows = query.get_artist(
         name=name,
-        category=category,
+        category=category.value if category else None,
+        skip=skip,
+        limit=limit,
     )
     return rows
 
 @app.get("/artists/{name}/charts",
         tags=["Artists"],
-        response_model=list[ChartEntryResponse])
+        response_model=list[ChartEntryResponse],
+        summary="Get artist chart history",
+        description="""
+        Return weekly chart history for a specific artist.
+
+        Optionally filter by chart name.
+
+        Supports pagination with `skip` and `limit`.
+        """)
 def artist_charts(
     name: str,
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
 ):
     return query.artist_chart_history(
         artist=name,
-        chart_name=chart_name,
+        chart_name=chart_name.value if chart_name else None,
+        skip=skip,
+        limit=limit,
     )
 
 @app.get("/artists/{name}/certifications",
         tags=["Artists"],
-        response_model=list[CertificationLevelResponse])
+        response_model=list[CertificationLevelResponse],
+        summary="Get artist certification levels",
+        description="""
+        Return certification level breakdown for a specific artist.
+
+        Example:
+        - Or: 12
+        - Platine: 8
+        - Diamant: 2
+""")
 def artist_certification_levels(
     name: str,
-    category: str | None = None,
+    category: CategoryName | None = None,
 ): 
     rows = query.artist_certifications(
         name=name,
-        category=category,
+        category=category.value if category else None,
     )
     return [
         {
@@ -113,31 +169,53 @@ def artist_certification_levels(
 
 @app.get("/charts",
         tags=["Charts"],
-        response_model=list[ChartEntryResponse]
+        response_model=list[ChartEntryResponse],
+        summary="Search weekly chart entries",
+        description="""
+Filter weekly chart entries by:
+
+- chart_name
+- rank
+- artist
+- title
+- label_distributor
+- week
+- year
+
+Supports pagination with `skip` and `limit`.
+"""
 )
 def charts(
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
     rank: int | None = None,
     artist: str | None = None,
     title: str | None = None,
     label_distributor: str | None = None,
     week: int | None = None,
     year: int | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
 ):
     rows = query.search_charts(
-        chart_name=chart_name,
+        chart_name=chart_name.value if chart_name else None,
         rank=rank,
         artist=artist,
         title=title,
         label_distributor=label_distributor,
         week=week,
         year=year,
+        skip=skip,
+        limit=limit,
     )
     return rows
 
-@app.get("/charts/count", tags=["Charts"], response_model=CountResponse)
+@app.get("/charts/count", 
+         tags=["Charts"], 
+         response_model=CountResponse, 
+         summary="Count chart entries", 
+         description="Returns total number of chart rows, opyionally filtered by chart_name.")
 def chart_entries_count(
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
 ):
     return {
         "count": query.count_chart_entries(chart_name)
@@ -145,14 +223,24 @@ def chart_entries_count(
 
 @app.get("/charts/week",
         tags=["Charts"],
-        response_model=list[ChartEntryResponse])
+        response_model=list[ChartEntryResponse],
+        summary="Get weekly chart snapshot",
+        description="""
+        Return a full weekly chart ranking for a given:
+
+        - chart_name
+        - year
+        - week
+
+        Results are ordered by rank ascending.
+""")
 def charts_week(
-    chart_name: str,
+    chart_name: ChartName,
     week: int,
     year: int,
 ):
     rows = query.get_chart_week(
-        chart_name=chart_name,
+        chart_name=chart_name.value,
         week=week,
         year=year,
     )
@@ -165,13 +253,15 @@ def charts_week(
 
 @app.get("/stats/charts/top-artists",
         tags=["Stats"],
-        response_model=list[ArtistCountResponse])
+        response_model=list[ArtistCountResponse],
+        summary="Top chart artists", 
+        description="Returns artists with the highest number of chart appearances.")
 def charts_top_artists(
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
     limit: int = 10
 ):
     rows = query.top_chart_artists(
-        chart_name=chart_name,
+        chart_name=chart_name.value if chart_name else None,
         limit=limit
     )
     return [
@@ -184,13 +274,19 @@ def charts_top_artists(
 
 @app.get("/stats/charts/top-distributors",
         tags=["Stats"],
-        response_model=list[LabelCountResponse])
+        response_model=list[LabelCountResponse],
+        summary="Top chart distributors",
+        description="""
+        Return labels / distributors with the highest number of chart entries.
+
+        Optionally filter by chart name.
+""")
 def charts_top_distributors(
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
     limit: int = 10
 ):
     rows = query.top_chart_distributors(
-        chart_name=chart_name,
+        chart_name=chart_name.value if chart_name else None,
         limit=limit
     )
     return [
@@ -203,15 +299,24 @@ def charts_top_distributors(
 
 @app.get("/stats/charts/number-ones",
         tags=["Stats"],
-        response_model=list[NumberOneEntriesResponse])
+        response_model=list[NumberOneEntriesResponse],
+        summary="Number one chart entries",
+        description="""
+        Return artists with the most number one chart entries.
+
+        Can filter by:
+        - artist
+        - chart_name
+""")
 def charts_number_ones(
     artist: str | None = None,
-    chart_name: str | None = None,
+    chart_name: ChartName | None = None,
     limit: int = 10,
 ):
+    chart_name_value = chart_name.value if chart_name else None
     rows = query.entries_at_number_one(
         artist=artist,
-        chart_name=chart_name,
+        chart_name=chart_name_value,
         limit=limit,
     )
 
@@ -219,7 +324,7 @@ def charts_number_ones(
         return [
             {
             "artist": artist,
-            "chart_name": chart_name,
+            "chart_name": chart_name_value,
             "weeks_at_number_one": rows,
             }
         ]
@@ -227,7 +332,7 @@ def charts_number_ones(
     return [
         {    
             "artist": artist_name,
-            "chart_name": chart_name,
+            "chart_name": chart_name_value,
             "weeks_at_number_one": count,
         }
         for artist_name, count in rows
@@ -236,7 +341,9 @@ def charts_number_ones(
 
 @app.get("/stats/by-category",
         tags=["Stats"],
-        response_model=list[CategoryCountResponse])
+        response_model=list[CategoryCountResponse],
+        summary="Certification counts by category",
+        description="Return number of certifications grouped by category.")
 def stats_by_category():
     rows = query.count_by_category()
     return [
@@ -249,7 +356,9 @@ def stats_by_category():
 
 @app.get("/stats/by-year",
         tags=["Stats"],
-        response_model=list[YearCountResponse])
+        response_model=list[YearCountResponse],
+        summary="Certification counts by year",
+        description="Return number of certifications grouped by source year.")
 def stats_by_year():
     rows = query.count_by_year()
     return [
@@ -262,13 +371,19 @@ def stats_by_year():
 
 @app.get("/stats/top-artists",
         tags=["Stats"],
-        response_model=list[ArtistCountResponse])
+        response_model=list[ArtistCountResponse],
+        summary="Top certified artists",
+        description="""
+        Return artists with the highest number of certifications.
+
+        Optionally filter by category.
+""")
 def stats_top_artists(
-    category: str | None = None,
+    category: CategoryName | None = None,
     limit: int = 10,
 ):
     rows = query.top_artists(
-        category=category,
+        category=category.value if category else None,
         limit=limit,
     )
     return [
@@ -281,13 +396,19 @@ def stats_top_artists(
 
 @app.get("/stats/top-distributors",
         tags=["Stats"],
-        response_model=list[LabelCountResponse])
+        response_model=list[LabelCountResponse],
+        summary="Top distributors by certifications",
+        description="""
+        Return distributors / labels with the highest number of certifications.
+
+        Optionally filter by category.
+""")
 def stats_top_distributors(
-    category: str | None = None,
+    category: CategoryName | None = None,
     limit: int = 10,
 ):
     rows = query.top_distributors(
-        category=category,
+        category=category.value if category else None,
         limit=limit,
     )
     return [
@@ -300,9 +421,18 @@ def stats_top_distributors(
 
 @app.get("/stats/certification-levels",
         tags=["Stats"],
-        response_model=list[CertificationLevelResponse])
-def stats_certification_levels(category: str | None = None):
-    rows = query.certification_by_levels(category=category)
+        response_model=list[CertificationLevelResponse],
+        summary="Certification level breakdown",
+        description="""
+        Return counts by certification level.
+
+        Example:
+        - Or
+        - Platine
+        - Diamant
+""")
+def stats_certification_levels(category: CategoryName | None = None):
+    rows = query.certification_by_levels(category=category.value if category else None)
 
     return [
         {
