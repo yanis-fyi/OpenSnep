@@ -6,12 +6,12 @@ from sqlalchemy import create_engine
 
 load_dotenv()
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+db_path = os.getenv("DATABASE_PATH", "./data/opensnep.db")
+DATABASE_PATH = Path(db_path)
 
-DATABASE_PATH = PROJECT_ROOT / os.getenv(
-    "DATABASE_PATH",
-    "./data/opensnep.db",
-)
+if not DATABASE_PATH.is_absolute():
+    PROJECT_ROOT = Path(__file__).resolve().parents[3]
+    DATABASE_PATH = PROJECT_ROOT / DATABASE_PATH
 
 DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
