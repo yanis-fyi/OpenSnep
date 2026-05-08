@@ -9,4 +9,5 @@ data/processed/
 data/*.db
 notebooks/
 logs/*.log
+*.egg-info/
 *.pyc
