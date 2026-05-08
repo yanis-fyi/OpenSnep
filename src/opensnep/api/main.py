@@ -2,17 +2,38 @@ from fastapi import FastAPI, Query, HTTPException
 from opensnep.database import query
 from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
 from opensnep.api.schemas import ChartName, CategoryName
+from sqlalchemy import text
+from opensnep.database.connection import engine
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 app = FastAPI(title="OpenSnep API",
               description="Open data API for French music certifications and charts",
               version="0.1.0",
-
 )
 
-def certifications_count(category: CategoryName | None = None):
-    return {
-        "count": query.count_certifications(category)
-    }
+
+
+# CORS
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+def raise_404_if_empty(rows, message: str):
+    if not rows:
+        raise HTTPException(status_code=404, detail=message)
 
 # =======
 # Root
@@ -36,9 +57,26 @@ def root():
         ],
     }
 
-def raise_404_if_empty(rows, message: str):
-    if not rows:
-        raise HTTPException(status_code=404, detail=message)
+# =============
+# Health check
+# =============
+
+@app.get("/health", tags=["Root"], 
+         summary="Health check", 
+         description="Returns API health status")
+def health():
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {
+            "status": "ok",
+            "database": "connected",
+        }
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Database unavailable",
+        )
     
 # ================
 # Certifications
@@ -49,6 +87,11 @@ def raise_404_if_empty(rows, message: str):
          response_model=CountResponse,
          summary="Count certification entries",
          description="Returns total number of certifications, optionally filtered by category")
+
+def certifications_count(category: CategoryName | None = None):
+    return {
+        "count": query.count_certifications(category)
+    }
 
 @app.get("/certifications",
         tags=["Certifications"],
