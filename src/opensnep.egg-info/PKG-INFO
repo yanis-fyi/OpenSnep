@@ -1,5 +1,12 @@
 Metadata-Version: 2.4
 Name: opensnep
 Version: 0.1.0
-Summary: French music certification database project
+Summary: French music certifications and charts API
 Requires-Python: >=3.13
+Requires-Dist: beautifulsoup4
+Requires-Dist: fastapi
+Requires-Dist: pandas
+Requires-Dist: python-dotenv
+Requires-Dist: requests
+Requires-Dist: sqlalchemy
+Requires-Dist: uvicorn

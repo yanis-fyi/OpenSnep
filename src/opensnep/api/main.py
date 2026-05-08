@@ -1,3 +1,6 @@
+import os 
+from dotenv import load_dotenv
+
 from fastapi import FastAPI, Query, HTTPException
 from opensnep.database import query
 from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
@@ -6,11 +9,12 @@ from sqlalchemy import text
 from opensnep.database.connection import engine
 from fastapi.middleware.cors import CORSMiddleware
 
+load_dotenv()
 
 
 app = FastAPI(title="OpenSnep API",
               description="Open data API for French music certifications and charts",
-              version="0.1.0",
+              version=os.getenv("API_VERSION", "0.1.0"),
 )
 
 

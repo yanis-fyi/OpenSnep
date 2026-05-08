@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+
 import time
 from datetime import date
 from pathlib import Path
@@ -7,13 +10,21 @@ from opensnep.ingestion.charts import crawl_chart, CHART_CATEGORIES
 from opensnep.cleaning.charts import clean_charts
 from opensnep.database.load import load_chart_entries
 
+load_dotenv()
+
+LOG_LEVEL = getattr(
+    logging,
+    os.getenv("LOG_LEVEL", "INFO").upper(),
+    logging.INFO,
+)
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOG_DIR = PROJECT_ROOT / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 logging.basicConfig(
     filename=LOG_DIR / "update_charts.log",
-    level=logging.INFO,
+    level=LOG_LEVEL,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 

@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+
 import logging
 import time
 from datetime import date
@@ -7,6 +10,13 @@ from opensnep.ingestion.certifications import crawl_certifications
 from opensnep.cleaning.certifications import clean_certifications
 from opensnep.database.load import load_certifications
 
+load_dotenv()
+
+LOG_LEVEL = getattr(
+    logging,
+    os.getenv("LOG_LEVEL", "INFO").upper(),
+    logging.INFO,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOG_DIR = PROJECT_ROOT / "logs"
@@ -14,7 +24,7 @@ LOG_DIR.mkdir(exist_ok=True)
 
 logging.basicConfig(
     filename=LOG_DIR / "update_certifications.log",
-    level=logging.INFO,
+    level=LOG_LEVEL,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 

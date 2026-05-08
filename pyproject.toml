@@ -5,8 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "opensnep"
 version = "0.1.0"
-description = "French music certification database project"
+description = "French music certifications and charts API"
 requires-python = ">=3.13"
+
+dependencies = [
+    "beautifulsoup4",
+    "fastapi",
+    "pandas",
+    "python-dotenv",
+    "requests",
+    "sqlalchemy",
+    "uvicorn",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
