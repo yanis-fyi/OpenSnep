@@ -3,12 +3,30 @@
 OpenSnep is an open data API for French music certifications and weekly
 charts, powered by SNEP data.
 
+---
+
+## Live API
+
+**Base URL**  
+https://opensnep.up.railway.app
+
+**Swagger Docs**  
+https://opensnep.up.railway.app/docs
+
+**Health Check**  
+https://opensnep.up.railway.app/health
+
+---
+
 ## Features
 
 - **Certifications dataset**
+
   - Singles
   - Albums
+
 - **Weekly charts dataset**
+
   - Top Albums
   - Top Singles
   - Top Albums Classique
@@ -16,10 +34,17 @@ charts, powered by SNEP data.
   - Top Rock & Metal
   - Top Albums Physiques
   - Top Radio
-- FastAPI REST API with Swagger docs
-- SQLite database with indexes and uniqueness constraints
-- Automated update scripts with logging
-- Automated API tests with pytest
+
+- **API**
+- FastAPI REST API
+- Swagger documentation
+- PostgreSQL production database
+- SQLite local development
+- Indexed schema + uniqueness constraints
+- Automated update scripts
+- Automated tests with pytest
+
+---
 
 ## Project structure
 
@@ -29,29 +54,47 @@ OpenSnep/
 ├── logs/
 ├── notebooks/
 ├── scripts/
+│   ├── backfill_certifications.py
+│   ├── backfill_charts.py
+│   ├── backfill_top_radio.py
 │   ├── update_charts.py
-│   └── update_certifications.py
+│   ├── update_certifications.py
+│   └── migrate_sqlite_to_postgres.py
 ├── src/
 │   └── opensnep/
 │       ├── api/
 │       ├── cleaning/
 │       ├── database/
-│       ├── ingestion/
-│       └── parsing/
+│       └── ingestion/
+│
 ├── tests/
 ├── .env
 ├── pyproject.toml
 ├── requirements-dev.txt
+├── requirements.txt
 └── README.md
 ```
 
 ## Installation
 
-Create a virtual environment and install:
+Create a virtual environment then:
+
+Install base dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Or install the package in editable mode:
 
 ```bash
 pip install -e .
-pip install -r requirements-dev.txt
 ```
 
 ## Configuration
@@ -91,8 +134,19 @@ Health check:
 - `/stats/charts/top-artists`
 - `/stats/top-distributors`
 
+## Backfill scripts
+
+Used to rebuild historical datasets.
+
+```bash
+python scripts/backfill_certifications.py
+python scripts/backfill_charts.py
+python scripts/backfill_top_radio.py
+```
+
 ## Update scripts
 
+Used for incremental updates
 Update charts:
 
 ```bash
@@ -103,6 +157,14 @@ Update certifications:
 
 ```bash
 python scripts/update_certifications.py
+```
+
+## Migration
+
+Used to migrate local SQLite data to PostgreSQL
+
+```bash
+pytest
 ```
 
 ## Tests
@@ -117,11 +179,13 @@ pytest
 
 - FastAPI
 - SQLAlchemy
+- PostgreSQL
 - SQLite
 - Pandas
 - BeautifulSoup
 - Requests
 - Pytest
+- Railway
 
 ## License
 
