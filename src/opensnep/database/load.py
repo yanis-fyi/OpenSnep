@@ -13,6 +13,16 @@ def load_certifications(df) -> None:
     if df.empty:
         print("No rows to load")
         return
+    
+    df = df.drop_duplicates(
+    subset=[
+        "interprete",
+        "titre",
+        "certification",
+        "categorie",
+        "date_constat",
+    ]
+    ).copy()
     source_year = int(df["source_year"].iloc[0])
     source_category = df["categorie"].iloc[0]
 
@@ -54,6 +64,8 @@ def load_chart_entries(df) -> None:
     if df.empty:
         print("No entries to load")
         return
+    
+   
     
     chart_name = df["chart_name"].iloc[0]
     year = int(df["year"].iloc[0])

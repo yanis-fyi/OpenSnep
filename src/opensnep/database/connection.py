@@ -4,16 +4,19 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-load_dotenv()
+load_dotenv(override=False)
 
-db_path = os.getenv("DATABASE_PATH", "./data/opensnep.db")
-DATABASE_PATH = Path(db_path)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_PATH.is_absolute():
-    PROJECT_ROOT = Path(__file__).resolve().parents[3]
-    DATABASE_PATH = PROJECT_ROOT / DATABASE_PATH
+if DATABASE_URL is None:
+    db_path = os.getenv("DATABASE_PATH", "./data/opensnep.db")
+    DATABASE_PATH = Path(db_path)
 
-DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
+    if not DATABASE_PATH.is_absolute():
+        PROJECT_ROOT = Path(__file__).resolve().parents[3]
+        DATABASE_PATH = PROJECT_ROOT / DATABASE_PATH
+
+    DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(
     DATABASE_URL,

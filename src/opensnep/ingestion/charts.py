@@ -8,7 +8,7 @@ BASE_WEEKLY_CHART_URL = (
 )
 
 BASE_RADIO_CHART_URL = (
-    "https://snepmusique.com/les-tops/le-top-de-la-semaine/top-albums/"
+    "https://snepmusique.com/classement-radio/"
 )
 
 CHART_CATEGORIES = {

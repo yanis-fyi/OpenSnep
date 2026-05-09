@@ -7,7 +7,7 @@ from opensnep.database.load import load_chart_entries
 failed = []
 chart_name = "Top Radio"
 
-for year in range(2018, 2027):
+for year in range(2012, 2027):
     for week in range(1, 53):
         try:
             print(f"Backfilling {chart_name} | {year} week {week}")
