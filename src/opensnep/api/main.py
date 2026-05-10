@@ -49,7 +49,7 @@ def raise_404_if_empty(rows, message: str):
 def root():
     return {
         "name": "OpenSnep API",
-        "version": "0.1.0",
+        "version": "1.0.0",
         "description": "French music data API powered by SNEP charts and certifications",
         "documentation": "/docs",
         "resources": [
