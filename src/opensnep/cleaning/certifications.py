@@ -31,13 +31,19 @@ DATE_COLUMNS = [
 ]
 
 COLLAB_PATTERN = re.compile(
-    r"\s*(?:FEAT\.?|FT\.?|FEATURING|,|&|X)\s*",
+    r"(?:\s+(?:FEAT\.?|FT\.?|FEATURING|AVEC|WITH|X|&|/)\s+|\s*,\s*)",
     flags=re.IGNORECASE,
 )
 
 
-def extract_interprete_principal(interprete: str) -> str:
-    return re.split(COLLAB_PATTERN, interprete, maxsplit=1)[0].strip()
+def get_main_artist(artist: str) -> str:
+    if pd.isna(artist):
+        return ""
+    
+    artist = str(artist).strip()
+    parts = COLLAB_PATTERN.split(artist)
+
+    return parts[0].strip()
 
 def clean_text_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -76,10 +82,10 @@ def clean_certifications(df: pd.DataFrame) -> pd.DataFrame:
 
     df = clean_text_columns(df)
     df = clean_date_columns(df)
+    
 
-    df["interprete_principal"] = df["interprete"].apply(
-        extract_interprete_principal
-    )
+    if "interprete" in df.columns:
+        df["interprete_principal"] = df["interprete"].apply(get_main_artist)
     
 
     ordered_columns = [

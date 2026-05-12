@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from opensnep.database.connection import engine
 from opensnep.database.models import Base, Certification, ChartEntry
+from sqlalchemy import text
 
 #creates table if missing
 def create_tables() -> None:
@@ -51,6 +52,15 @@ def load_certifications(df) -> None:
             .filter(Certification.categorie == source_category)
             .delete()
         )
+        if session.bind.dialect.name == "postgresql":
+            session.execute(
+                text("""
+                    SELECT setval(
+                        pg_get_serial_sequence('certifications', 'id'),
+                        COALESCE((SELECT MAX(id) FROM certifications), 1)
+                    )
+                 """)
+            )
         session.add_all(records)
         session.commit()
 
