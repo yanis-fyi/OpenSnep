@@ -103,6 +103,15 @@ def load_chart_entries(df) -> None:
             .filter(ChartEntry.week == week)
             .delete()
         )
+        if session.bind.dialect.name == "postgresql":
+            session.execute(
+                text("""
+                    SELECT setval(
+                        pg_get_serial_sequence('charts', 'id'),
+                        COALESCE((SELECT MAX(id) FROM charts), 1)
+                    )
+                 """)
+            )
         session.add_all(records)
         session.commit()
 
