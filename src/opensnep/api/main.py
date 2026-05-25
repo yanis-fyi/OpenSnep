@@ -1,7 +1,12 @@
 import os 
 from dotenv import load_dotenv
 
-from fastapi import FastAPI, Query, HTTPException
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+
+from fastapi import FastAPI, Query, HTTPException, Request
 from opensnep.database import query
 from opensnep.api.schemas import CertificationResponse, ChartEntryResponse, CountResponse, ArtistCountResponse, LabelCountResponse, CategoryCountResponse, CertificationLevelResponse, YearCountResponse, NumberOneEntriesResponse
 from opensnep.api.schemas import ChartName, CategoryName
@@ -17,7 +22,15 @@ app = FastAPI(title="OpenSnep API",
               version=os.getenv("API_VERSION", "0.1.0"),
 )
 
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
+app.state.limiter = limiter
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
 
 # CORS
 origins = [
@@ -65,17 +78,23 @@ def root():
 # Health check
 # =============
 
-@app.get("/health", tags=["Root"], 
-         summary="Health check", 
-         description="Returns API health status")
-def health():
+@app.get(
+    "/health",
+    tags=["Root"],
+    summary="Health check",
+    description="Returns API health status"
+)
+@limiter.limit("120/minute")
+def health(request: Request):
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
+
         return {
             "status": "ok",
             "database": "connected",
         }
+
     except Exception:
         raise HTTPException(
             status_code=503,
@@ -91,8 +110,10 @@ def health():
          response_model=CountResponse,
          summary="Count certification entries",
          description="Returns total number of certifications, optionally filtered by category")
-
-def certifications_count(category: CategoryName | None = None):
+@limiter.limit("120/minute")
+def certifications_count(
+    request: Request,
+    category: CategoryName | None = None):
     return {
         "count": query.count_certifications(category)
     }
@@ -113,7 +134,9 @@ Filter certification entries by:
 Supports pagination with `skip` and `limit`.
 """
 )
+@limiter.limit("30/minute")
 def certifications(
+    request: Request,
     artist: str | None = None,
     title: str | None = None,
     category: CategoryName | None = None,
@@ -150,7 +173,9 @@ Optionally filter by category.
 
 Supports pagination with `skip` and `limit`.
 """)
+@limiter.limit("60/minute")
 def artist(
+    request: Request,
     name: str,
     category: CategoryName | None = None,
     skip: int = Query(default=0, ge=0),
@@ -183,7 +208,9 @@ Optionally filter by chart name.
 Supports pagination with `skip` and `limit`.
 """,
 )
+@limiter.limit("60/minute")
 def artist_charts(
+    request: Request,
     name: str,
     chart_name: ChartName | None = None,
     skip: int = Query(default=0, ge=0),
@@ -215,7 +242,9 @@ Example:
 - Platine: 8
 - Diamant: 2
 """)
+@limiter.limit("60/minute")
 def artist_certification_levels(
+    request: Request,
     name: str,
     category: CategoryName | None = None,
 ): 
@@ -253,7 +282,9 @@ Filter weekly chart entries by:
 Supports pagination with `skip` and `limit`.
 """
 )
+@limiter.limit("30/minute")
 def charts(
+    request: Request,
     chart_name: ChartName | None = None,
     rank: int | None = None,
     artist: str | None = None,
@@ -283,7 +314,9 @@ def charts(
          response_model=CountResponse, 
          summary="Count chart entries", 
          description="Returns total number of chart rows, opyionally filtered by chart_name.")
+@limiter.limit("120/minute")
 def chart_entries_count(
+    request: Request,
     chart_name: ChartName | None = None,
 ):
     return {
@@ -304,7 +337,9 @@ Return a full weekly chart ranking for a given:
 
 Results are ordered by rank ascending.
 """)
+@limiter.limit("30/minute")
 def charts_week(
+    request: Request,
     chart_name: ChartName,
     week: int,
     year: int,
@@ -329,7 +364,9 @@ def charts_week(
         response_model=list[ArtistCountResponse],
         summary="Top chart artists", 
         description="Returns artists with the highest number of chart appearances.")
+@limiter.limit("20/minute")
 def charts_top_artists(
+    request: Request,
     chart_name: ChartName | None = None,
     limit: int = 10
 ):
@@ -355,7 +392,9 @@ Return labels / distributors with the highest number of chart entries.
 
 Optionally filter by chart name.
 """)
+@limiter.limit("20/minute")
 def charts_top_distributors(
+    request: Request,
     chart_name: ChartName | None = None,
     limit: int = 10
 ):
@@ -383,7 +422,9 @@ Can filter by:
 - artist
 - chart_name
 """)
+@limiter.limit("20/minute")
 def charts_number_ones(
+    request: Request,
     artist: str | None = None,
     chart_name: ChartName | None = None,
     limit: int = 10,
@@ -419,7 +460,8 @@ def charts_number_ones(
         response_model=list[CategoryCountResponse],
         summary="Certification counts by category",
         description="Return number of certifications grouped by category.")
-def stats_by_category():
+@limiter.limit("20/minute")
+def stats_by_category(request: Request):
     rows = query.count_by_category()
     return [
         {
@@ -435,7 +477,8 @@ def stats_by_category():
         response_model=list[YearCountResponse],
         summary="Certification counts by year",
         description="Return number of certifications grouped by source year.")
-def stats_by_year():
+@limiter.limit("20/minute")
+def stats_by_year(request: Request):
     rows = query.count_by_year()
     return [
         {
@@ -455,7 +498,9 @@ Return artists with the highest number of certifications.
 
 Optionally filter by category.
 """)
+@limiter.limit("20/minute")
 def stats_top_artists(
+    request: Request,
     category: CategoryName | None = None,
     limit: int = 10,
 ):
@@ -481,7 +526,9 @@ Return distributors / labels with the highest number of certifications.
 
 Optionally filter by category.
 """)
+@limiter.limit("20/minute")
 def stats_top_distributors(
+    request: Request,
     category: CategoryName | None = None,
     limit: int = 10,
 ):
@@ -510,7 +557,10 @@ Example:
 - Platine
 - Diamant
 """)
-def stats_certification_levels(category: CategoryName | None = None):
+@limiter.limit("20/minute")
+def stats_certification_levels(
+    request: Request,
+    category: CategoryName | None = None):
     rows = query.certification_by_levels(category=category.value if category else None)
 
     return [
