@@ -19,7 +19,7 @@ load_dotenv()
 
 app = FastAPI(title="OpenSnep API",
               description="Open data API for French music certifications and charts",
-              version=os.getenv("API_VERSION", "0.1.0"),
+              version=os.getenv("API_VERSION", "1.0.0"),
 )
 
 # Rate limiter

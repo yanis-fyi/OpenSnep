@@ -17,6 +17,7 @@ dependencies = [
     "sqlalchemy",
     "uvicorn",
     "psycopg2-binary",
+    "slowapi",
 ]
 
 [tool.setuptools]
