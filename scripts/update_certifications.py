@@ -65,15 +65,23 @@ def update_certifications(year: int) -> list[tuple[str, int, str]]:
     return failed
 
 
-if __name__ == "__main__":
+def main():
     logging.info("=" * 60)
     logging.info("STARTING CERTIFICATIONS UPDATE")
     logging.info("=" * 60)
 
     current_year = date.today().year
 
-    update_certifications(year=current_year)
+    failed = update_certifications(year=current_year)
+
+    if failed:
+        logging.error(f"Update completed with failures: {failed}")
 
     logging.info("=" * 60)
     logging.info("CERTIFICATIONS UPDATE FINISHED")
     logging.info("=" * 60)
+
+    return failed
+
+if __name__ == "__main__":
+    main()

@@ -56,23 +56,32 @@ def update_charts(year: int, week: int) -> list[tuple[str, int, int, str]]:
     return failed
 
 
-if __name__ == "__main__":
+def main():
     logging.info("=" * 60)
     logging.info("STARTING CHART UPDATE")
     logging.info("=" * 60)
 
     today = date.today()
     year, week, _ = today.isocalendar()
-    
+
     failed = update_charts(year=year, week=week)
 
     if len(failed) == len(CHART_CATEGORIES):
-        message= "Current week unavailable, trying previous week..."
+        message = f"Week {week} unavailable, trying week {week - 1}..."
         print(message)
         logging.warning(message)
 
-        update_charts(year=year, week=week - 1)
-    
+        failed = update_charts(year=year, week=week - 1)
+
+    if failed:
+        logging.error(f"Chart update completed with failures: {failed}")
+
     logging.info("=" * 60)
     logging.info("CHART UPDATE FINISHED")
     logging.info("=" * 60)
+
+    return failed
+
+
+if __name__ == "__main__":
+    main()
