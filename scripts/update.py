@@ -1,5 +1,5 @@
-from scripts.update_certifications import main as update_certifications
-from scripts.update_charts import main as update_charts
+from update_certifications import main as update_certifications
+from update_charts import main as update_charts
 
 
 def main():
