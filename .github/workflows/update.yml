@@ -29,3 +29,17 @@ jobs:
           python scripts/update.py
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Notify Discord Success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d '{"content":"✅ OpenSnep weekly update completed successfully"}' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord Failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d '{"content":"❌ OpenSnep weekly update failed"}' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
