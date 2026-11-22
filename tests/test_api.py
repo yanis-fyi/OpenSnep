@@ -15,6 +15,34 @@ def test_root():
     assert response.status_code == 200
     assert response.json()["name"] == "OpenSnep API"
 
+def test_cors_allows_local_development_origins_on_arbitrary_ports():
+    for origin in (
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://localhost:9000",
+        "http://127.0.0.1:9000",
+    ):
+        response = client.get("/", headers={"Origin": origin})
+
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
+
+def test_cors_preserves_production_origin():
+    origin = "https://artistorbit.netlify.app"
+
+    response = client.get("/", headers={"Origin": origin})
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin
+
+def test_cors_rejects_unlisted_external_origin():
+    response = client.get("/", headers={"Origin": "https://example.com"})
+
+    assert response.status_code == 200
+    assert "access-control-allow-origin" not in response.headers
+
 def test_certifications():
     response = client.get("/certifications?limit=5")
 

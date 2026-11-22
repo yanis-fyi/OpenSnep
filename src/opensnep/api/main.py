@@ -40,10 +40,12 @@ origins = [
     "http://127.0.0.1:5173",
     "https://artistorbit.netlify.app",
 ]
+development_origin_regex = r"^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?$"
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=development_origin_regex,
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=["*"],
@@ -570,4 +572,3 @@ def stats_certification_levels(
             "count": count,
         }
         for certification, count in rows ]
-
